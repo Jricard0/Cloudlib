@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,13 +9,22 @@
     <None Remove="Models\" />
     <None Remove="Google.Cloud.Compute.V1" />
     <None Remove="Helpers\" />
+    <None Remove="Compute\Services\" />
+    <None Remove="Exceptions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Compute\" />
     <Folder Include="Models\" />
     <Folder Include="Helpers\" />
+    <Folder Include="Compute\Services\" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Cloud.Compute.V1" Version="1.2.0" />
+    <PackageReference Include="Google.Cloud.Compute.V1" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="Compute\GoogleComputeInstance.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Cloudlib.Compute.Services;
 using Cloudlib.Models;
 using Google.Api.Gax;
 using Google.Cloud.Compute.V1;
@@ -9,12 +10,12 @@ using Google.Rpc;
 
 namespace Cloudlib.Compute
 {
-    public class GoogleCompute : ICompute
+    public class GoogleComputeInstance : IComputeInstance
     {
         private InstancesClient _instancesClient;
         private string Project { get; set; }
 
-        public GoogleCompute(string project)
+        public GoogleComputeInstance(string project)
         {
             _instancesClient = InstancesClient.Create();
             Project = project;
@@ -44,7 +45,7 @@ namespace Cloudlib.Compute
             {
                 VirtualMachine virtualMachine = new()
                 {
-                    Id = instance.Id,
+                    Id = instance.Id.ToString(),
                     Location = new Location()
                     {
                         Region = instance.Zone.Split("zones/")[1].Split("-")[0],
@@ -70,9 +71,10 @@ namespace Cloudlib.Compute
                 {
                     VirtualMachine virtualMachine = new VirtualMachine()
                     {
-                        Id = instance.Id,
+                        Id = instance.Id.ToString(),
                         Name = instance.Name,
-                        Location = new Location() {
+                        Location = new Location()
+                        {
                             Region = instance.Zone.Split("zones/")[1].Split("-")[0],
                             Zone = instance.Zone.Split("zones/")[1]
                         },
@@ -93,7 +95,8 @@ namespace Cloudlib.Compute
             }
 
             List<VirtualMachine> virtualMachines = new List<VirtualMachine>();
-            AggregatedListInstancesRequest request = new AggregatedListInstancesRequest() {
+            AggregatedListInstancesRequest request = new AggregatedListInstancesRequest()
+            {
                 Project = Project,
             };
 
@@ -105,7 +108,7 @@ namespace Cloudlib.Compute
                     {
                         VirtualMachine virtualMachine = new VirtualMachine()
                         {
-                            Id = instance.Id,
+                            Id = instance.Id.ToString(),
                             Name = instance.Name,
                             Location = new Location()
                             {
@@ -123,41 +126,27 @@ namespace Cloudlib.Compute
 
         public bool Start(string name, string zone)
         {
-            try
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(zone))
             {
-                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(zone))
-                {
-                    throw new Exception("Instance name and Zone are required to perform this action");
-                }
+                throw new Exception("Instance name and Zone are required to perform this action");
+            }
 
-                StartInstanceRequest request = new StartInstanceRequest() { Project = Project, Instance = name, Zone = zone };
-                var operation = _instancesClient.Start(request).PollUntilCompleted();
-                return operation.Result.Status == Operation.Types.Status.Done;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error when trying to start '{name}'. {ex.Message}");
-            }
+            StartInstanceRequest request = new StartInstanceRequest() { Project = Project, Instance = name, Zone = zone };
+            var operation = _instancesClient.Start(request).PollUntilCompleted();
+            return operation.Result.Status == Operation.Types.Status.Done;
         }
 
         public bool Stop(string name, string zone)
         {
-            try
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(zone))
             {
-                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(zone))
-                {
-                    throw new Exception("Instance name and Zone are required to perform this action");
-                }
-
-                StopInstanceRequest request = new StopInstanceRequest() { Project = Project, Instance = name, Zone = zone };
-                var operation = _instancesClient.Stop(request).PollUntilCompleted();
-
-                return operation.Result.Status == Operation.Types.Status.Done;
+                throw new Exception("Instance name and Zone are required to perform this action");
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error when trying to stop '{name}'. {ex.Message}");
-            }
+
+            StopInstanceRequest request = new StopInstanceRequest() { Project = Project, Instance = name, Zone = zone };
+            var operation = _instancesClient.Stop(request).PollUntilCompleted();
+
+            return operation.Result.Status == Operation.Types.Status.Done;
         }
     }
 }

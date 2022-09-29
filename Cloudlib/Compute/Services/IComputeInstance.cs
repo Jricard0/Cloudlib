@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cloudlib.Models;
 
-namespace Cloudlib.Compute
+namespace Cloudlib.Compute.Services
 {
-    public interface ICompute
+    public interface IComputeInstance
     {
         public Task<List<VirtualMachine>> ListAsync();
         public Task<List<VirtualMachine>> ListAsync(string location);
