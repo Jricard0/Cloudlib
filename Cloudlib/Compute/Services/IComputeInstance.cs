@@ -13,5 +13,6 @@ namespace Cloudlib.Compute.Services
         public List<VirtualMachine> List(string location);
         public bool Start(string name, string zone);
         public bool Stop(string name, string zone);
+        public string GetName();
     }
 }

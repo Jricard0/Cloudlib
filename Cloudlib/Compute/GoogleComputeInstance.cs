@@ -12,8 +12,8 @@ namespace Cloudlib.Compute
 {
     public class GoogleComputeInstance : IComputeInstance
     {
-        private InstancesClient _instancesClient;
         private string Project { get; set; }
+        private readonly InstancesClient _instancesClient;
 
         public GoogleComputeInstance(string project)
         {
@@ -147,6 +147,11 @@ namespace Cloudlib.Compute
             var operation = _instancesClient.Stop(request).PollUntilCompleted();
 
             return operation.Result.Status == Operation.Types.Status.Done;
+        }
+
+        public string GetName()
+        {
+            return "Google Cloud Compute";
         }
     }
 }
