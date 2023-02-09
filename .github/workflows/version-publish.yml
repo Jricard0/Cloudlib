@@ -2,8 +2,8 @@ name: Publish version
 
 on:
   pull_request:
-    tags:
-      - '*'
+    branches:
+      - release/*
   workflow_dispatch:
 
 
