@@ -39,12 +39,12 @@ namespace Cloudlib.Compute
 
         public List<VirtualMachine> List()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This method does not have support, because AWS does not have synchronous operations");
         }
 
         public List<VirtualMachine> List(string location)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This method does not have support, because AWS does not have synchronous operations");
         }
 
         public async Task<List<VirtualMachine>> ListAsync()
@@ -124,12 +124,12 @@ namespace Cloudlib.Compute
 
         public bool Stop(string name, string zone)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This method does not have support, because AWS does not have synchronous operations");
         }
 
         public bool Start(string name, string zone)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("This method does not have support, because AWS does not have synchronous operations");
         }
 
         public async Task<bool> StopAsync(string id, string zone)
