@@ -126,10 +126,8 @@ namespace Cloudlib.Compute
 
         public bool Start(string name, string zone)
         {
-            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(zone))
-            {
-                throw new Exception("Instance name and Zone are required to perform this action");
-            }
+            ArgumentNullException.ThrowIfNull(name);
+            ArgumentNullException.ThrowIfNull(zone);
 
             StartInstanceRequest request = new StartInstanceRequest() { Project = Project, Instance = name, Zone = zone };
             var operation = _instancesClient.Start(request).PollUntilCompleted();
@@ -152,6 +150,16 @@ namespace Cloudlib.Compute
         public string GetName()
         {
             return "Google Cloud Compute";
+        }
+
+        public Task<bool> StartAsync(string name, string zone)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> StopAsync(string name, string zone)
+        {
+            throw new NotImplementedException();
         }
     }
 }

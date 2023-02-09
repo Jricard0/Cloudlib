@@ -4,12 +4,9 @@ using System.Threading.Tasks;
 using Azure.ResourceManager;
 using Cloudlib.Compute.Services;
 using Cloudlib.Models;
-
-//
 using Azure;
 using Azure.Core;
 using Azure.Identity;
-using Azure.ResourceManager;
 using Azure.ResourceManager.Compute;
 using Azure.ResourceManager.Compute.Models;
 using Azure.ResourceManager.Network;
@@ -115,6 +112,16 @@ namespace Cloudlib.Compute
         public string GetName()
         {
             return "Microsoft Azure Compute Services";
+        }
+
+        public Task<bool> StartAsync(string name, string zone)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> StopAsync(string name, string zone)
+        {
+            throw new NotImplementedException();
         }
     }
 }

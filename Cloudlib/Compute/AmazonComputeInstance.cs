@@ -3,13 +3,33 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cloudlib.Compute.Services;
 using Cloudlib.Models;
+using Amazon;
+using Amazon.EC2;
+using Amazon.EC2.Model;
+using System.Text.RegularExpressions;
+using System.Linq;
+using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
 
 namespace Cloudlib.Compute
 {
     public class AmazonComputeInstance : IComputeInstance
     {
+        private readonly string _accessKey;
+        private readonly string _secretAccessKey;
+        private readonly bool _isCredentialsLoaded = false;
+        private AmazonEC2Client _client;
+
+        public AmazonComputeInstance(string accessKey, string secretAccessKey)
+        {
+            _accessKey = accessKey;
+            _secretAccessKey = secretAccessKey;
+            _client = new AmazonEC2Client(accessKey, secretAccessKey, RegionEndpoint.USEast1);
+        }
+
         public AmazonComputeInstance()
         {
+            _isCredentialsLoaded = true;
+            _client = new AmazonEC2Client();
         }
 
         public string GetName()
@@ -27,12 +47,82 @@ namespace Cloudlib.Compute
             throw new NotImplementedException();
         }
 
-        public Task<List<VirtualMachine>> ListAsync()
+        public async Task<List<VirtualMachine>> ListAsync()
         {
-            throw new NotImplementedException();
+            List<VirtualMachine> virtualMachines = new();
+            foreach (var region in RegionEndpoint.EnumerableAllRegions)
+            {
+                _client = BuildClient(region.SystemName);//TODO: add support to native RegionEndpoint type, not only string
+                virtualMachines.AddRange(await HandleInstanceList(_client));
+            }
+            return virtualMachines;
         }
 
-        public Task<List<VirtualMachine>> ListAsync(string location)
+        private async Task<List<VirtualMachine>> HandleInstanceList(AmazonEC2Client client)
+        {
+            var response = await client.DescribeInstancesAsync();
+
+            List<VirtualMachine> virtualMachines = new List<VirtualMachine>();
+
+            foreach (var reservation in response.Reservations)
+            {
+                foreach (var instance in reservation.Instances)
+                {
+                    VirtualMachine virtualMachine = new VirtualMachine
+                    {
+                        Id = instance.InstanceId,
+                        Location = new Models.Location
+                        {
+                            Region = _client.Config.RegionEndpoint.SystemName,
+                            Zone = instance.Placement.AvailabilityZone
+                        },
+                        Name = instance?.Tags.Find(t => t.Key == "Name").Value
+                    };
+
+                    virtualMachines.Add(virtualMachine);
+                }
+            }
+            return virtualMachines;
+        }
+
+        private AmazonEC2Client BuildClient(string location)
+        {
+            ArgumentNullException.ThrowIfNull(location);
+
+            var region = RegionEndpoint.GetBySystemName(location);
+
+            if (_isCredentialsLoaded)
+                return new AmazonEC2Client(region);
+            return new AmazonEC2Client(_accessKey, _secretAccessKey, region);
+        }
+
+        public async Task<List<VirtualMachine>> ListAsync(string location)
+        {
+            ArgumentNullException.ThrowIfNull(location);
+            _client = BuildClient(location);
+            var response = await _client.DescribeInstancesAsync();
+
+            List<VirtualMachine> virtualMachines = new List<VirtualMachine>();
+            virtualMachines.AddRange(await HandleInstanceList(_client));
+            return virtualMachines;
+        }
+
+        public async Task<bool> StartAsync(string id, string zone)
+        {
+            ArgumentNullException.ThrowIfNull(id);
+            ArgumentNullException.ThrowIfNull(zone);
+
+            _client = BuildClient(zone);
+            StartInstancesRequest request = new StartInstancesRequest
+            {
+                InstanceIds = new List<string> { id }
+            };
+
+            var response = await _client.StartInstancesAsync(request);
+            return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
+        }
+
+        public bool Stop(string name, string zone)
         {
             throw new NotImplementedException();
         }
@@ -42,9 +132,19 @@ namespace Cloudlib.Compute
             throw new NotImplementedException();
         }
 
-        public bool Stop(string name, string zone)
+        public async Task<bool> StopAsync(string id, string zone)
         {
-            throw new NotImplementedException();
+            ArgumentNullException.ThrowIfNull(id);
+            ArgumentNullException.ThrowIfNull(zone);
+
+            _client = BuildClient(zone);
+            StopInstancesRequest request = new StopInstancesRequest
+            {
+                InstanceIds = new List<string> { id }
+            };
+
+            var response = await _client.StopInstancesAsync(request);
+            return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
     }
 }
