@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace Cloudlib.Models
 {
@@ -9,5 +10,7 @@ namespace Cloudlib.Models
         public string Name { get; set; }
         public Location Location { get; set; }
         public List<Tag> Tags { get; set; }
+        public IPAddress PrivateIP { get; set; }
+        public IPAddress PublicIP { get; set; }
     }
 }

@@ -8,7 +8,7 @@ using Amazon.EC2;
 using Amazon.EC2.Model;
 using System.Text.RegularExpressions;
 using System.Linq;
-using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
+using System.Net;
 
 namespace Cloudlib.Compute
 {
@@ -76,7 +76,10 @@ namespace Cloudlib.Compute
                             Region = _client.Config.RegionEndpoint.SystemName,
                             Zone = instance.Placement.AvailabilityZone
                         },
-                        Name = instance?.Tags.Find(t => t.Key == "Name").Value
+                        Name = instance?.Tags.Find(t => t.Key == "Name").Value,
+                        PrivateIP = IPAddress.Parse(instance.PrivateIpAddress),
+                        PublicIP = IPAddress.Parse(instance.PublicIpAddress),
+                        Tags = instance?.Tags.Select(x => new Models.Tag { Key = x.Key, Value = x.Value }).ToList()
                     };
 
                     virtualMachines.Add(virtualMachine);

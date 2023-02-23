@@ -114,14 +114,18 @@ namespace Cloudlib.Compute
             return "Microsoft Azure Compute Services";
         }
 
-        public Task<bool> StartAsync(string name, string zone)
+        public async Task<bool> StartAsync(string name, string zone)
         {
-            throw new NotImplementedException();
+            var instance = _virtualMachineResources.Get(name);
+            var operation = await instance.Value.PowerOffAsync(WaitUntil.Started);
+            return operation.HasCompleted;
         }
 
-        public Task<bool> StopAsync(string name, string zone)
+        public async Task<bool> StopAsync(string name, string zone)
         {
-            throw new NotImplementedException();
+            var instance = _virtualMachineResources.Get(name);
+            var operation = await instance.Value.PowerOnAsync(WaitUntil.Started);
+            return operation.HasCompleted;
         }
     }
 }
