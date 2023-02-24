@@ -12,7 +12,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Jricard0/cloudlib">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="logo.jpg" alt="Logo" width="150" height="150">
   </a>
 
 <h3 align="center">Cloudlib</h3>
@@ -147,7 +147,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-João Ricardo - [Twitter](https://twitter.com/twitter_handle) - joao.ricardo@odesenvolvedor.cloud
+João Ricardo - [Twitter](https://twitter.com/xjricard) - joao.ricardo@odesenvolvedor.cloud
 
 Project Link: [https://github.com/Jricard0/cloudlib](https://github.com/Jricard0/cloudlib)
 
