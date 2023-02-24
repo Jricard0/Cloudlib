@@ -7,6 +7,8 @@ using Cloudlib.Models;
 using Google.Api.Gax;
 using Google.Cloud.Compute.V1;
 using Google.Rpc;
+using System.Linq;
+using System.Net;
 
 namespace Cloudlib.Compute
 {
@@ -52,7 +54,8 @@ namespace Cloudlib.Compute
                         Zone = instance.Zone.Split("zones/")[1]
                     },
                     Name = instance.Name,
-                    Tags = new()
+                    Tags = new(),
+                    PrivateIP = IPAddress.Parse(instance.NetworkInterfaces.Where(i => i.Ipv6Address != null).FirstOrDefault().NetworkIP)
                 };
 
                 virtualMachines.Add(virtualMachine);
@@ -78,6 +81,8 @@ namespace Cloudlib.Compute
                             Region = instance.Zone.Split("zones/")[1].Split("-")[0],
                             Zone = instance.Zone.Split("zones/")[1]
                         },
+                        Tags = instance?.Labels.Select(x => new Tag { Key = x.Key, Value = x.Value }).ToList(),
+                        PrivateIP = IPAddress.Parse(instance?.NetworkInterfaces.Select(n => n.NetworkIP != null).FirstOrDefault().ToString())
                     };
 
                     virtualMachines.Add(virtualMachine);
