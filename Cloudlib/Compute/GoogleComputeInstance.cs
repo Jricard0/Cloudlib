@@ -9,6 +9,7 @@ using Google.Cloud.Compute.V1;
 using Google.Rpc;
 using System.Linq;
 using System.Net;
+using System.Text;
 
 namespace Cloudlib.Compute
 {
@@ -19,8 +20,9 @@ namespace Cloudlib.Compute
 
         public GoogleComputeInstance(string project)
         {
-            _instancesClient = InstancesClient.Create();
+            ArgumentException.ThrowIfNullOrEmpty(project);
             Project = project;
+            _instancesClient = InstancesClient.Create();
         }
 
         public List<VirtualMachine> List()
@@ -82,7 +84,8 @@ namespace Cloudlib.Compute
                             Zone = instance.Zone.Split("zones/")[1]
                         },
                         Tags = instance?.Labels.Select(x => new Tag { Key = x.Key, Value = x.Value }).ToList(),
-                        PrivateIP = IPAddress.Parse(instance?.NetworkInterfaces.Select(n => n.NetworkIP != null).FirstOrDefault().ToString())
+                        PrivateIP = IPAddress.Parse(instance.NetworkInterfaces[0].NetworkIP),
+                        PublicIP = IPAddress.Parse(instance.NetworkInterfaces[0].AccessConfigs[0].NatIP)
                     };
 
                     virtualMachines.Add(virtualMachine);
@@ -120,6 +123,7 @@ namespace Cloudlib.Compute
                                 Region = Regex.Replace(instance.Zone.Split("zones/")[1], "/[a-z]$/gm", ""),
                                 Zone = instance.Zone.Split("zones/")[1]
                             },
+                            PrivateIP = new(Encoding.UTF8.GetBytes(instance.NetworkInterfaces[0].NetworkIP))
                         };
 
                         virtualMachines.Add(virtualMachine);
@@ -157,14 +161,57 @@ namespace Cloudlib.Compute
             return "Google Cloud Compute";
         }
 
-        public Task<bool> StartAsync(string name, string zone)
+        public async Task<bool> StartAsync(string name, string zone)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            ArgumentException.ThrowIfNullOrEmpty(zone);
+
+            StartInstanceRequest request = new StartInstanceRequest() { Project = Project, Instance = name, Zone = zone };
+            var operation = await _instancesClient.StartAsync(request);
+            return operation.Result.Status == Operation.Types.Status.Pending;
         }
 
-        public Task<bool> StopAsync(string name, string zone)
+        public async Task<bool> StopAsync(string name, string zone)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            ArgumentException.ThrowIfNullOrEmpty(zone);
+
+            StopInstanceRequest request = new StopInstanceRequest() { Project = Project, Instance = name, Zone = zone };
+            var operation = await _instancesClient.StopAsync(request);
+            return operation.Result.Status == Operation.Types.Status.Pending;
+        }
+
+        public async Task<bool> DeleteAsync(string name, string location)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            ArgumentException.ThrowIfNullOrEmpty(location);
+
+            DeleteInstanceRequest request = new()
+            {
+                Instance = name,
+                Project = Project,
+                Zone = location
+            };
+
+            var operation = await _instancesClient.DeleteAsync(request);
+            return operation.Result.Status == Operation.Types.Status.Pending;
+        }
+
+        public bool Delete(string name, string location)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            ArgumentException.ThrowIfNullOrEmpty(location);
+
+            DeleteInstanceRequest request = new()
+            {
+                Instance = name,
+                Project = Project,
+                Zone = location
+            };
+
+            var operation = _instancesClient.Delete(request);
+            var result = operation.PollUntilCompleted();
+            return result.Result.Status == Operation.Types.Status.Done;
         }
     }
 }

@@ -149,6 +149,16 @@ namespace Cloudlib.Compute
             var response = await _client.StopInstancesAsync(request);
             return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
+
+        public Task<bool> DeleteAsync(string name, string location)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Delete(string name, string location)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 
