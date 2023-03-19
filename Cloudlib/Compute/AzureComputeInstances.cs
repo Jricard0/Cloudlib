@@ -127,6 +127,16 @@ namespace Cloudlib.Compute
             var operation = await instance.Value.PowerOnAsync(WaitUntil.Started);
             return operation.HasCompleted;
         }
+
+        public Task<bool> DeleteAsync(string name, string location)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Delete(string name, string location)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

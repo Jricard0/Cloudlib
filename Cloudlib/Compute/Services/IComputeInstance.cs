@@ -16,5 +16,7 @@ namespace Cloudlib.Compute.Services
         public bool Stop(string name, string zone);
         public Task<bool> StopAsync(string name, string zone);
         public string GetName();
+        public Task<bool> DeleteAsync(string name, string location);
+        public bool Delete(string name, string location);
     }
 }
