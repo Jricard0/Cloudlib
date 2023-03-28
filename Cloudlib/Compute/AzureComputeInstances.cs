@@ -128,14 +128,20 @@ namespace Cloudlib.Compute
             return operation.HasCompleted;
         }
 
-        public Task<bool> DeleteAsync(string name, string location)
+        public async Task<bool> DeleteAsync(string name, string location = "")
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            var virtualMachine = await _virtualMachineResources.GetAsync(name);
+            var operation = await virtualMachine.Value.DeleteAsync(WaitUntil.Started);
+            return operation.HasCompleted;
         }
 
         public bool Delete(string name, string location)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            var virtualMachine = _virtualMachineResources.Get(name);
+            var operation = virtualMachine.Value.Delete(WaitUntil.Completed);
+            return operation.HasCompleted;
         }
     }
 }
