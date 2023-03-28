@@ -150,14 +150,24 @@ namespace Cloudlib.Compute
             return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
 
-        public Task<bool> DeleteAsync(string name, string location)
+        public async Task<bool> DeleteAsync(string id, string zone)
         {
-            throw new NotImplementedException();
+            ArgumentException.ThrowIfNullOrEmpty(id);
+            ArgumentException.ThrowIfNullOrEmpty(zone);
+
+            _client = BuildClient(zone);
+            TerminateInstancesRequest request = new TerminateInstancesRequest
+            {
+                InstanceIds = new List<string> { id }
+            };
+
+            var response = await _client.TerminateInstancesAsync(request);
+            return response.HttpStatusCode == HttpStatusCode.OK;
         }
 
         public bool Delete(string name, string location)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Non-async operations are not allowed on AWS Cloud");
         }
     }
 }
